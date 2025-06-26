@@ -12,8 +12,9 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiService.villages.getAll();
-      setVillages(Array.isArray(data) ? data : []);
+      const response = await apiService.villages.getAll();
+      // API returns { success: true, data: [...], count: number, message: string }
+      setVillages(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       setError(err.message);
       setVillages([]);
@@ -27,7 +28,9 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      const newVillage = await apiService.villages.create(villageData);
+      const response = await apiService.villages.create(villageData);
+      // API returns { success: true, data: {...}, message: string }
+      const newVillage = response.data;
       setVillages(prev => [...prev, newVillage]);
       return newVillage;
     } catch (err) {
@@ -43,7 +46,9 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      const updatedVillage = await apiService.villages.update(id, villageData);
+      const response = await apiService.villages.update(id, villageData);
+      // API returns { success: true, data: {...}, message: string }
+      const updatedVillage = response.data;
       setVillages(prev => 
         prev.map(village => 
           village.id === id ? updatedVillage : village
