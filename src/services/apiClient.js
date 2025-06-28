@@ -7,9 +7,9 @@ import axios from 'axios';
 
 // API Configuration
 const API_CONFIG = {
-  // Direct connection to Mock Auth Service (as approved)
-  AUTH_BASE_URL: 'http://localhost:3002',
-  MAIN_API_BASE_URL: 'http://localhost:3001', // For future use
+  // Production Railway URLs
+  AUTH_BASE_URL: 'https://smart-village-auth-service-production.up.railway.app',
+  MAIN_API_BASE_URL: 'https://smart-village-backend-production.up.railway.app',
   TIMEOUT: 10000, // 10 seconds
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000 // 1 second
@@ -27,7 +27,7 @@ const authApiClient = axios.create({
   }
 });
 
-// Create axios instance for Main API (future use)
+// Create axios instance for Main API
 const mainApiClient = axios.create({
   baseURL: API_CONFIG.MAIN_API_BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
@@ -301,25 +301,99 @@ export const authApi = {
   }
 };
 
-// Main API methods (placeholder for future)
+// Main API methods
 export const mainApi = {
+  // Properties
+  getProperties: async (params = {}) => {
+    try {
+      const response = await mainApiClient.get('/api/properties', { params });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to get properties');
+    }
+  },
+
+  createProperty: async (propertyData) => {
+    try {
+      const response = await mainApiClient.post('/api/properties', propertyData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to create property');
+    }
+  },
+
+  updateProperty: async (id, propertyData) => {
+    try {
+      const response = await mainApiClient.put(`/api/properties/${id}`, propertyData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update property');
+    }
+  },
+
+  deleteProperty: async (id) => {
+    try {
+      const response = await mainApiClient.delete(`/api/properties/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to delete property');
+    }
+  },
+
+  // Property Types
+  getPropertyTypes: async () => {
+    try {
+      const response = await mainApiClient.get('/api/admin/property-types');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to get property types');
+    }
+  },
+
+  // Property Status
+  getPropertyStatus: async () => {
+    try {
+      const response = await mainApiClient.get('/api/admin/property-status');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to get property status');
+    }
+  },
+
   // Users
   getUsers: async (params = {}) => {
     try {
-      const response = await mainApiClient.get('/api/v1/users', { params });
+      const response = await mainApiClient.get('/api/users', { params });
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to get users');
     }
   },
 
-  // Properties (placeholder)
-  getProperties: async (params = {}) => {
+  createUser: async (userData) => {
     try {
-      const response = await mainApiClient.get('/api/v1/properties', { params });
+      const response = await mainApiClient.post('/api/users', userData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to get properties');
+      throw new Error(error.response?.data?.message || 'Failed to create user');
+    }
+  },
+
+  updateUser: async (id, userData) => {
+    try {
+      const response = await mainApiClient.put(`/api/users/${id}`, userData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to update user');
+    }
+  },
+
+  deleteUser: async (id) => {
+    try {
+      const response = await mainApiClient.delete(`/api/users/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to delete user');
     }
   },
 
