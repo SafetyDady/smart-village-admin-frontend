@@ -1,63 +1,114 @@
-import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import VillageList from './components/VillageList'
-import HealthStatus from './components/HealthStatus'
-import { useVillages } from './hooks/useVillages'
-import './App.css'
+import { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
+import Dashboard from './components/Dashboard';
+import UserManagementPage from './pages/UserManagementPage';
+import PropertyManagementPage from './pages/PropertyManagementPage';
+import { Toaster } from 'sonner';
+import './App.css';
 
-function App() {
-  const {
-    villages,
-    loading,
-    error,
-    fetchVillages,
-    createVillage,
-    updateVillage,
-    deleteVillage,
-  } = useVillages();
+// Main App Content with Navigation
+function AppContent() {
+  const { isAuthenticated, loading } = useAuth();
+  const [currentPage, setCurrentPage] = useState('dashboard');
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            🏘️ Smart Village Management System
-          </h1>
-          <p className="text-xl text-gray-600">
-            ระบบจัดการหมู่บ้านอัจฉริยะ - Admin Dashboard
-          </p>
+  // Handle navigation between pages
+  const handleNavigate = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Handle back to dashboard
+  const handleBackToDashboard = () => {
+    setCurrentPage('dashboard');
+  };
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading...</p>
         </div>
-
-        <Tabs defaultValue="villages" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="villages" className="text-lg">
-              จัดการหมู่บ้าน
-            </TabsTrigger>
-            <TabsTrigger value="status" className="text-lg">
-              สถานะระบบ
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="villages" className="space-y-6">
-            <VillageList 
-              villages={villages}
-              loading={loading}
-              error={error}
-              onRefresh={fetchVillages}
-              onCreate={createVillage}
-              onUpdate={updateVillage}
-              onDelete={deleteVillage}
-            />
-          </TabsContent>
-
-          <TabsContent value="status" className="space-y-6">
-            <HealthStatus />
-          </TabsContent>
-        </Tabs>
       </div>
-    </div>
-  )
+    );
+  }
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Render current page based on navigation state
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'users':
+        return <UserManagementPage onBack={handleBackToDashboard} />;
+      case 'properties':
+        return <PropertyManagementPage onBack={handleBackToDashboard} />;
+      case 'financial':
+        return (
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-4">Financial Management</h1>
+              <p className="text-gray-600 mb-4">Coming soon in Phase 4...</p>
+              <button 
+                onClick={handleBackToDashboard}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        );
+      case 'reports':
+        return (
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-4">Reports & Analytics</h1>
+              <p className="text-gray-600 mb-4">Coming soon in Phase 4...</p>
+              <button 
+                onClick={handleBackToDashboard}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-4">System Settings</h1>
+              <p className="text-gray-600 mb-4">Coming soon in Phase 4...</p>
+              <button 
+                onClick={handleBackToDashboard}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        );
+      default:
+        return <Dashboard onNavigate={handleNavigate} />;
+    }
+  };
+
+  return renderCurrentPage();
 }
 
-export default App
+function App() {
+  return (
+    <AuthProvider>
+      <div className="App">
+        <AppContent />
+        <Toaster position="top-right" />
+      </div>
+    </AuthProvider>
+  );
+}
+
+export default App;
 
