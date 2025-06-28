@@ -242,9 +242,14 @@ export const authApi = {
     try {
       const response = await authApiClient.post('/auth/login', credentials);
       
+      // Handle different token structures from Production API
+      const tokens = response.data.tokens || {};
+      const accessToken = tokens.accessToken || response.data.token || response.data.access_token;
+      const refreshTokenValue = tokens.refreshToken || response.data.refreshToken || response.data.refresh_token;
+      
       // Set tokens after successful login
-      if (response.data.token) {
-        setAuthTokens(response.data.token, response.data.refreshToken);
+      if (accessToken) {
+        setAuthTokens(accessToken, refreshTokenValue);
       }
       
       return response.data;

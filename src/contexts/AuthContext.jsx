@@ -107,11 +107,53 @@ export function AuthProvider({ children }) {
         if (token && user) {
           const userData = JSON.parse(user);
           
+          // Transform permissions and roles for backward compatibility
+          const transformPermissions = (permissions) => {
+            if (Array.isArray(permissions)) {
+              return permissions; // Already in correct format
+            }
+            
+            if (typeof permissions === 'object' && permissions !== null) {
+              // Convert object structure to flat array
+              const permissionArray = [];
+              Object.keys(permissions).forEach(resource => {
+                const actions = permissions[resource];
+                if (Array.isArray(actions)) {
+                  actions.forEach(action => {
+                    permissionArray.push(`${resource}.${action}`);
+                  });
+                }
+              });
+              return permissionArray;
+            }
+            
+            return []; // Fallback to empty array
+          };
+
+          const transformRoles = (role, roles) => {
+            // Check if roles array exists first
+            if (Array.isArray(roles)) {
+              return roles;
+            }
+            
+            // If single role string exists, convert to array
+            if (typeof role === 'string') {
+              // Capitalize first letter to match expected format
+              const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
+              return [capitalizedRole];
+            }
+            
+            return []; // Fallback to empty array
+          };
+          
           // Normalize user data to ensure arrays
           const normalizedUser = {
             ...userData,
-            permissions: Array.isArray(userData.permissions) ? userData.permissions : [],
-            roles: Array.isArray(userData.roles) ? userData.roles : []
+            permissions: transformPermissions(userData.permissions),
+            roles: transformRoles(userData.role, userData.roles),
+            // Map field names if needed
+            first_name: userData.firstName || userData.first_name,
+            last_name: userData.lastName || userData.last_name
           };
 
           dispatch({
@@ -160,19 +202,65 @@ export function AuthProvider({ children }) {
       const { authApi } = await import('../services/apiClient');
       const data = await authApi.login(credentials);
 
+      // Transform Production API structure to Frontend expected structure
+      const transformPermissions = (permissions) => {
+        if (Array.isArray(permissions)) {
+          return permissions; // Already in correct format
+        }
+        
+        if (typeof permissions === 'object' && permissions !== null) {
+          // Convert object structure to flat array
+          const permissionArray = [];
+          Object.keys(permissions).forEach(resource => {
+            const actions = permissions[resource];
+            if (Array.isArray(actions)) {
+              actions.forEach(action => {
+                permissionArray.push(`${resource}.${action}`);
+              });
+            }
+          });
+          return permissionArray;
+        }
+        
+        return []; // Fallback to empty array
+      };
+
+      const transformRoles = (role, roles) => {
+        // Check if roles array exists first
+        if (Array.isArray(roles)) {
+          return roles;
+        }
+        
+        // If single role string exists, convert to array
+        if (typeof role === 'string') {
+          // Capitalize first letter to match expected format
+          const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
+          return [capitalizedRole];
+        }
+        
+        return []; // Fallback to empty array
+      };
+
       // Normalize user data to ensure arrays
       const normalizedUser = {
         ...data.user,
-        permissions: Array.isArray(data.user.permissions) ? data.user.permissions : [],
-        roles: Array.isArray(data.user.roles) ? data.user.roles : []
+        permissions: transformPermissions(data.user.permissions),
+        roles: transformRoles(data.user.role, data.user.roles),
+        // Map field names if needed
+        first_name: data.user.firstName || data.user.first_name,
+        last_name: data.user.lastName || data.user.last_name
       };
+
+      // Handle different token structures
+      const accessToken = data.tokens?.accessToken || data.access_token || data.token;
+      const refreshToken = data.tokens?.refreshToken || data.refresh_token || data.refreshToken;
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: {
           user: normalizedUser,
-          token: data.access_token || data.token,
-          refreshToken: data.refresh_token || data.refreshToken
+          token: accessToken,
+          refreshToken: refreshToken
         }
       });
 
