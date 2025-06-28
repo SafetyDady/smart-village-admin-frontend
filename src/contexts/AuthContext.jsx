@@ -105,12 +105,21 @@ export function AuthProvider({ children }) {
         const lastLogin = localStorage.getItem('last_login');
 
         if (token && user) {
+          const userData = JSON.parse(user);
+          
+          // Normalize user data to ensure arrays
+          const normalizedUser = {
+            ...userData,
+            permissions: Array.isArray(userData.permissions) ? userData.permissions : [],
+            roles: Array.isArray(userData.roles) ? userData.roles : []
+          };
+
           dispatch({
             type: AUTH_ACTIONS.LOGIN_SUCCESS,
             payload: {
               token,
               refreshToken,
-              user: JSON.parse(user)
+              user: normalizedUser
             }
           });
         }
@@ -151,12 +160,19 @@ export function AuthProvider({ children }) {
       const { authApi } = await import('../services/apiClient');
       const data = await authApi.login(credentials);
 
+      // Normalize user data to ensure arrays
+      const normalizedUser = {
+        ...data.user,
+        permissions: Array.isArray(data.user.permissions) ? data.user.permissions : [],
+        roles: Array.isArray(data.user.roles) ? data.user.roles : []
+      };
+
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: {
-          user: data.user,
-          token: data.token,
-          refreshToken: data.refreshToken
+          user: normalizedUser,
+          token: data.access_token || data.token,
+          refreshToken: data.refresh_token || data.refreshToken
         }
       });
 
@@ -223,17 +239,31 @@ export function AuthProvider({ children }) {
       return false;
     }
 
+    // Ensure permissions is an array
+    const permissions = Array.isArray(state.user.permissions) 
+      ? state.user.permissions 
+      : [];
+
     // Superadmin has all permissions
-    if (state.user.permissions.includes('all')) {
+    if (permissions.includes('all')) {
       return true;
     }
 
-    return state.user.permissions.includes(permission);
+    return permissions.includes(permission);
   };
 
   // Check if user has specific role
   const hasRole = (role) => {
-    return state.user?.roles?.includes(role);
+    if (!state.user || !state.user.roles) {
+      return false;
+    }
+
+    // Ensure roles is an array
+    const roles = Array.isArray(state.user.roles) 
+      ? state.user.roles 
+      : [];
+
+    return roles.includes(role);
   };
 
   // Context value
@@ -251,9 +281,9 @@ export function AuthProvider({ children }) {
     hasRole,
 
     // Computed properties
-    isAdmin: state.user?.roles?.includes('Admin') || state.user?.roles?.includes('SuperAdmin'),
-    isSuperAdmin: state.user?.roles?.includes('SuperAdmin'),
-    userName: state.user ? `${state.user.first_name} ${state.user.last_name}` : null,
+    isAdmin: hasRole('Admin') || hasRole('SuperAdmin'),
+    isSuperAdmin: hasRole('SuperAdmin'),
+    userName: state.user ? `${state.user.first_name || ''} ${state.user.last_name || ''}`.trim() : null,
     userInitials: state.user ? `${state.user.first_name?.[0] || ''}${state.user.last_name?.[0] || ''}` : null
   };
 
