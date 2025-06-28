@@ -99,9 +99,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const loadAuthState = () => {
       try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('access_token');
         const refreshToken = localStorage.getItem('refresh_token');
-        const user = localStorage.getItem('auth_user');
+        const user = localStorage.getItem('user');
         const lastLogin = localStorage.getItem('last_login');
 
         if (token && user) {
@@ -117,9 +117,9 @@ export function AuthProvider({ children }) {
       } catch (error) {
         console.error('Error loading auth state:', error);
         // Clear corrupted data
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        localStorage.removeItem('auth_user');
+        localStorage.removeItem('user');
         localStorage.removeItem('last_login');
       }
     };
@@ -130,14 +130,14 @@ export function AuthProvider({ children }) {
   // Save authentication state to localStorage
   useEffect(() => {
     if (state.isAuthenticated && state.token && state.user) {
-      localStorage.setItem('auth_token', state.token);
+      localStorage.setItem('access_token', state.token);
       localStorage.setItem('refresh_token', state.refreshToken || '');
-      localStorage.setItem('auth_user', JSON.stringify(state.user));
+      localStorage.setItem('user', JSON.stringify(state.user));
       localStorage.setItem('last_login', state.lastLogin || '');
     } else {
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      localStorage.removeItem('auth_user');
+      localStorage.removeItem('user');
       localStorage.removeItem('last_login');
     }
   }, [state.isAuthenticated, state.token, state.user, state.refreshToken, state.lastLogin]);
@@ -233,7 +233,7 @@ export function AuthProvider({ children }) {
 
   // Check if user has specific role
   const hasRole = (role) => {
-    return state.user?.role === role;
+    return state.user?.roles?.includes(role);
   };
 
   // Context value
@@ -251,10 +251,10 @@ export function AuthProvider({ children }) {
     hasRole,
 
     // Computed properties
-    isAdmin: state.user?.role === 'admin' || state.user?.role === 'superadmin',
-    isSuperAdmin: state.user?.role === 'superadmin',
-    userName: state.user ? `${state.user.firstName} ${state.user.lastName}` : null,
-    userInitials: state.user ? `${state.user.firstName?.[0] || ''}${state.user.lastName?.[0] || ''}` : null
+    isAdmin: state.user?.roles?.includes('Admin') || state.user?.roles?.includes('SuperAdmin'),
+    isSuperAdmin: state.user?.roles?.includes('SuperAdmin'),
+    userName: state.user ? `${state.user.first_name} ${state.user.last_name}` : null,
+    userInitials: state.user ? `${state.user.first_name?.[0] || ''}${state.user.last_name?.[0] || ''}` : null
   };
 
   return (

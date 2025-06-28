@@ -86,8 +86,9 @@ authApiClient.interceptors.request.use(
     // Add request timestamp
     config.metadata = { startTime: new Date() };
     
-    // Add correlation ID for tracking
-    config.headers['X-Correlation-ID'] = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Temporarily remove X-Correlation-ID due to CORS issue
+    // TODO: Re-enable when Railway Auth Service CORS is fixed
+    // config.headers['X-Correlation-ID'] = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     console.log(`🔐 Auth API Request: ${config.method?.toUpperCase()} ${config.url}`, {
       headers: config.headers,
@@ -178,7 +179,9 @@ authApiClient.interceptors.response.use(
 mainApiClient.interceptors.request.use(
   (config) => {
     config.metadata = { startTime: new Date() };
-    config.headers['X-Correlation-ID'] = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Temporarily remove X-Correlation-ID due to CORS issue
+    // TODO: Re-enable when Railway Backend CORS is fixed
+    // config.headers['X-Correlation-ID'] = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     console.log(`🔗 Main API Request: ${config.method?.toUpperCase()} ${config.url}`, {
       headers: config.headers,

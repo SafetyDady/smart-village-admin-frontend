@@ -9,7 +9,7 @@ import './App.css';
 
 // Main App Content with Navigation
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
 
   // Handle navigation between pages
@@ -23,7 +23,7 @@ function AppContent() {
   };
 
   // Show loading while checking authentication
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
