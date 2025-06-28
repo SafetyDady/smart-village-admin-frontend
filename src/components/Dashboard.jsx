@@ -39,7 +39,7 @@ export default function Dashboard({ onNavigate }) {
       title: 'User Management',
       description: 'Manage system users and permissions',
       icon: Users,
-      permission: 'user_management',
+      permissions: ['users.read', 'users.create', 'users.update', 'users.delete'], // Check if user has any user-related permission
       onClick: () => onNavigate && onNavigate('users')
     },
     {
@@ -47,7 +47,7 @@ export default function Dashboard({ onNavigate }) {
       title: 'Property Management',
       description: 'Manage village properties and assets',
       icon: Building,
-      permission: 'property_management',
+      permissions: ['villages.read', 'villages.create', 'villages.update', 'villages.delete'], // Check if user has any village-related permission
       onClick: () => onNavigate && onNavigate('properties')
     },
     {
@@ -55,7 +55,7 @@ export default function Dashboard({ onNavigate }) {
       title: 'Financial Management',
       description: 'Handle financial operations and accounting',
       icon: DollarSign,
-      permission: 'financial_management',
+      permissions: ['payments.read', 'payments.create', 'payments.update', 'payments.delete'], // Check if user has any payment-related permission
       onClick: () => onNavigate && onNavigate('financial')
     },
     {
@@ -63,7 +63,7 @@ export default function Dashboard({ onNavigate }) {
       title: 'Reports & Analytics',
       description: 'Generate reports and view analytics',
       icon: BarChart3,
-      permission: 'report_generation',
+      permissions: ['audit.read', 'audit.export'], // Check if user has any audit-related permission
       onClick: () => onNavigate && onNavigate('reports')
     },
     {
@@ -71,13 +71,14 @@ export default function Dashboard({ onNavigate }) {
       title: 'System Settings',
       description: 'Configure system settings and preferences',
       icon: Settings,
-      permission: 'system_settings',
+      permissions: ['system.configure', 'system.monitor', 'system.backup', 'system.restore'], // Check if user has any system-related permission
       onClick: () => onNavigate && onNavigate('settings')
     }
   ];
 
+  // Check if user has any of the required permissions for each navigation item
   const availableItems = navigationItems.filter(item => 
-    hasPermission(item.permission)
+    item.permissions.some(permission => hasPermission(permission))
   );
 
   return (
