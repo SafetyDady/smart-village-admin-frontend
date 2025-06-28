@@ -10,7 +10,7 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Search, Plus, Building, MapPin, Users, Filter } from 'lucide-react';
 import PropertyList from '../components/properties/PropertyList';
-import PropertyForm from '../components/properties/PropertyForm';
+import PropertyFormAdvanced from '../components/properties/PropertyFormAdvanced';
 
 export default function PropertyManagementPage() {
   const [properties, setProperties] = useState([]);
@@ -326,10 +326,10 @@ export default function PropertyManagementPage() {
 
       {/* Property Form Modal */}
       {isFormOpen && (
-        <PropertyForm
+        <PropertyFormAdvanced
+          isOpen={isFormOpen}
           property={selectedProperty}
-          mode={formMode}
-          onSubmit={handleFormSubmit}
+          onSave={handleFormSubmit}
           onClose={() => {
             setIsFormOpen(false);
             setSelectedProperty(null);
