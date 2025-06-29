@@ -144,7 +144,7 @@ authApiClient.interceptors.response.use(
 
       try {
         if (refreshToken) {
-          const response = await authApiClient.post('/auth/refresh', {
+          const response = await authApiClient.post('/api/auth/refresh', {
             refreshToken: refreshToken
           });
 
@@ -240,7 +240,7 @@ export const authApi = {
   // Login
   login: async (credentials) => {
     try {
-      const response = await authApiClient.post('/auth/login', credentials);
+      const response = await authApiClient.post('/api/auth/login', credentials);
       
       // Handle different token structures from Production API
       const tokens = response.data.tokens || {};
@@ -261,7 +261,7 @@ export const authApi = {
   // Logout
   logout: async () => {
     try {
-      await authApiClient.post('/auth/logout');
+      await authApiClient.post('/api/auth/logout');
     } catch (error) {
       console.error('Logout API error:', error);
       // Continue with local logout even if API fails
@@ -273,7 +273,7 @@ export const authApi = {
   // Get user profile
   getProfile: async () => {
     try {
-      const response = await authApiClient.get('/auth/profile');
+      const response = await authApiClient.get('/api/auth/profile');
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to get profile');
@@ -283,7 +283,7 @@ export const authApi = {
   // Refresh token
   refreshToken: async (token) => {
     try {
-      const response = await authApiClient.post('/auth/refresh', {
+      const response = await authApiClient.post('/api/auth/refresh', {
         refreshToken: token
       });
       
@@ -301,7 +301,7 @@ export const authApi = {
   // Health check
   healthCheck: async () => {
     try {
-      const response = await authApiClient.get('/health');
+      const response = await authApiClient.get('/api/health');
       return response.data;
     } catch (error) {
       throw new Error('Auth service is not available');
@@ -334,7 +334,7 @@ export const mainApi = {
   // Health check
   healthCheck: async () => {
     try {
-      const response = await mainApiClient.get('/health');
+      const response = await mainApiClient.get('/api/health');
       return response.data;
     } catch (error) {
       throw new Error('Main API service is not available');
