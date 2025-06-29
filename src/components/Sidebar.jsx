@@ -1,124 +1,185 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Button } from './ui/button';
 import { 
-  Home, 
+  Home,
   Users, 
   Building, 
-  DollarSign, 
-  BarChart, 
-  Settings, 
-  HelpCircle, 
-  LogOut 
+  DollarSign,
+  BarChart3,
+  Settings,
+  HelpCircle,
+  LogOut,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
-const Sidebar = ({ isCollapsed, onToggle }) => {
-  const [activeItem, setActiveItem] = useState('dashboard');
+export default function Sidebar({ collapsed, onToggle, activeItem, onNavigate }) {
+  const { 
+    user, 
+    logout, 
+    hasPermission,
+    isAuthenticated 
+  } = useAuth();
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Menu items with permission checks
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/dashboard' },
-    { id: 'users', label: 'Users Management', icon: Users, href: '/users' },
-    { id: 'properties', label: 'Property Management', icon: Building, href: '/properties' },
-    { id: 'financial', label: 'Financial Management', icon: DollarSign, href: '/financial' },
-    { id: 'reports', label: 'Reports & Analytics', icon: BarChart, href: '/reports' },
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: Home,
+      path: '/',
+      permissions: [], // Dashboard accessible to all authenticated users
+      onClick: () => onNavigate && onNavigate('dashboard')
+    },
+    {
+      id: 'users',
+      label: 'Users Management',
+      icon: Users,
+      path: '/users',
+      permissions: ['users.read', 'users.create', 'users.update', 'users.delete'],
+      onClick: () => onNavigate && onNavigate('users')
+    },
+    {
+      id: 'properties',
+      label: 'Property Management',
+      icon: Building,
+      path: '/properties',
+      permissions: ['villages.read', 'villages.create', 'villages.update', 'villages.delete'],
+      onClick: () => onNavigate && onNavigate('properties')
+    },
+    {
+      id: 'financial',
+      label: 'Financial Management',
+      icon: DollarSign,
+      path: '/financial',
+      permissions: ['payments.read', 'payments.create', 'payments.update', 'payments.delete'],
+      onClick: () => onNavigate && onNavigate('financial')
+    },
+    {
+      id: 'reports',
+      label: 'Reports & Analytics',
+      icon: BarChart3,
+      path: '/reports',
+      permissions: ['audit.read', 'audit.export'],
+      onClick: () => onNavigate && onNavigate('reports')
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: Settings,
+      path: '/settings',
+      permissions: ['system.configure', 'system.monitor', 'system.backup', 'system.restore'],
+      onClick: () => onNavigate && onNavigate('settings')
+    },
+    {
+      id: 'help',
+      label: 'Help & Support',
+      icon: HelpCircle,
+      path: '/help',
+      permissions: [], // Help accessible to all authenticated users
+      onClick: () => onNavigate && onNavigate('help')
+    }
   ];
 
-  const bottomMenuItems = [
-    { id: 'settings', label: 'Settings', icon: Settings, href: '/settings' },
-    { id: 'help', label: 'Help & Support', icon: HelpCircle, href: '/help' },
-  ];
-
-  const handleItemClick = (itemId) => {
-    setActiveItem(itemId);
-  };
-
-  const MenuItem = ({ item, isActive, isBottom = false }) => {
-    const Icon = item.icon;
-    return (
-      <a
-        href={item.href}
-        onClick={(e) => {
-          e.preventDefault();
-          handleItemClick(item.id);
-        }}
-        className={`
-          flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 hover:scale-105
-          ${isActive 
-            ? 'bg-blue-50 text-blue-700' 
-            : isBottom 
-              ? 'text-gray-700 hover:bg-gray-50' 
-              : 'text-gray-700 hover:bg-gray-50'
-          }
-        `}
-      >
-        <Icon className={`text-lg w-5 h-5 ${isActive ? 'text-blue-700' : ''}`} />
-        <span 
-          className={`
-            menu-text font-medium transition-opacity duration-200
-            ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}
-          `}
-        >
-          {item.label}
-        </span>
-      </a>
-    );
-  };
+  // Filter menu items based on permissions
+  const availableItems = menuItems.filter(item => {
+    // If no permissions required, show to all authenticated users
+    if (item.permissions.length === 0) {
+      return true;
+    }
+    
+    // Check if user has any of the required permissions
+    return item.permissions.some(permission => hasPermission(permission));
+  });
 
   return (
-    <aside 
-      className={`
-        fixed left-0 top-16 bottom-0 z-40 bg-white shadow-lg transition-all duration-300 ease-in-out overflow-hidden
-        ${isCollapsed ? 'w-16' : 'w-64'}
-      `}
-    >
-      <div className="p-4">
-        {/* Navigation Menu */}
-        <nav className="space-y-2">
-          {menuItems.map((item) => (
-            <MenuItem 
-              key={item.id} 
-              item={item} 
-              isActive={activeItem === item.id}
-            />
-          ))}
-
-          {/* Divider */}
-          <div className="border-t border-gray-200 my-4"></div>
-
-          {bottomMenuItems.map((item) => (
-            <MenuItem 
-              key={item.id} 
-              item={item} 
-              isActive={activeItem === item.id}
-              isBottom={true}
-            />
-          ))}
-        </nav>
-      </div>
-
-      {/* Sidebar Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
-        <button 
-          className={`
-            flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-red-50 w-full transition-all duration-200 hover:scale-105
-          `}
-          onClick={() => {
-            // Handle logout
-            console.log('Logout clicked');
-          }}
-        >
-          <LogOut className="text-lg w-5 h-5" />
-          <span 
-            className={`
-              menu-text transition-opacity duration-200
-              ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}
-            `}
+    <div className={`bg-white shadow-lg border-r transition-all duration-300 fixed left-0 top-16 bottom-0 z-40 ${
+      collapsed ? 'w-16' : 'w-64'
+    }`}>
+      <div className="flex flex-col h-full">
+        {/* Toggle Button */}
+        <div className="p-4 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="w-full flex items-center justify-center"
           >
-            Logout
-          </span>
-        </button>
-      </div>
-    </aside>
-  );
-};
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
 
-export default Sidebar;
+        {/* Menu Items */}
+        <nav className="flex-1 p-4 space-y-2">
+          {availableItems.map((item) => {
+            const IconComponent = item.icon;
+            const isActive = activeItem === item.id;
+            
+            return (
+              <Button
+                key={item.id}
+                variant={isActive ? "default" : "ghost"}
+                size="sm"
+                onClick={item.onClick}
+                className={`w-full justify-start ${collapsed ? 'px-2' : 'px-4'} ${
+                  isActive ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'
+                }`}
+              >
+                <IconComponent className={`h-4 w-4 ${collapsed ? '' : 'mr-3'}`} />
+                {!collapsed && (
+                  <span className="truncate">{item.label}</span>
+                )}
+              </Button>
+            );
+          })}
+        </nav>
+
+        {/* User Info & Logout */}
+        <div className="p-4 border-t">
+          {!collapsed && (
+            <div className="mb-3 text-center">
+              <div className="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full text-sm font-medium mx-auto mb-2">
+                {user?.first_name?.[0] || user?.username?.[0] || 'U'}
+              </div>
+              <p className="text-xs text-gray-600 truncate">
+                {user?.first_name || user?.username || 'User'}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {user?.role || 'User'}
+              </p>
+            </div>
+          )}
+          
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            size="sm"
+            className={`w-full ${collapsed ? 'px-2' : 'px-4'}`}
+          >
+            <LogOut className={`h-4 w-4 ${collapsed ? '' : 'mr-2'}`} />
+            {!collapsed && <span>Logout</span>}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
