@@ -10,9 +10,10 @@ const API_CONFIG = {
   // Production Backend API - Updated to working Backend URL
   AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://5003-i20g2mf7h3g6yvum87t6g-c75ee32d.manusvm.computer',
   MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://5003-i20g2mf7h3g6yvum87t6g-c75ee32d.manusvm.computer',
-  TIMEOUT: 10000, // 10 seconds
-  RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000 // 1 second
+  TIMEOUT: 30000, // 30 seconds - เพิ่มจาก 10s เพื่อแก้ไขปัญหา timeout
+  RETRY_ATTEMPTS: 5, // เพิ่มจาก 3 เป็น 5 ครั้ง
+  RETRY_DELAY: 2000, // เพิ่มจาก 1s เป็น 2s
+  RETRY_BACKOFF: 1.5 // Exponential backoff multiplier
 };
 
 // Create axios instance for Auth Service
@@ -219,28 +220,45 @@ mainApiClient.interceptors.response.use(
   }
 );
 
-// Retry logic for failed requests
+// Enhanced retry logic for failed requests
 const retryRequest = async (apiClient, config, attempt = 1) => {
   try {
+    console.log(`🚀 API Request attempt ${attempt}/${API_CONFIG.RETRY_ATTEMPTS}: ${config.method?.toUpperCase()} ${config.url}`);
     return await apiClient(config);
   } catch (error) {
-    if (attempt < API_CONFIG.RETRY_ATTEMPTS && error.code === 'ECONNABORTED') {
-      console.log(`🔄 Retrying request (${attempt}/${API_CONFIG.RETRY_ATTEMPTS}): ${config.method?.toUpperCase()} ${config.url}`);
+    const isRetryableError = 
+      error.code === 'ECONNABORTED' || // Timeout
+      error.code === 'ENOTFOUND' ||    // DNS resolution failed
+      error.code === 'ECONNREFUSED' || // Connection refused
+      error.code === 'ETIMEDOUT' ||    // Connection timeout
+      error.message?.includes('timeout') || // Timeout in message
+      error.message?.includes('Network Error') || // Network error
+      (error.response?.status >= 500 && error.response?.status < 600); // Server errors
+
+    if (attempt < API_CONFIG.RETRY_ATTEMPTS && isRetryableError) {
+      const delay = API_CONFIG.RETRY_DELAY * Math.pow(API_CONFIG.RETRY_BACKOFF, attempt - 1);
+      console.log(`🔄 Retrying request (${attempt}/${API_CONFIG.RETRY_ATTEMPTS}) after ${delay}ms: ${error.message}`);
       
-      await new Promise(resolve => setTimeout(resolve, API_CONFIG.RETRY_DELAY * attempt));
+      await new Promise(resolve => setTimeout(resolve, delay));
       return retryRequest(apiClient, config, attempt + 1);
     }
     
+    console.error(`❌ Request failed after ${attempt} attempts:`, error.message);
     throw error;
   }
 };
 
 // Authentication API methods
 export const authApi = {
-  // Login
+  // Login with retry logic
   login: async (credentials) => {
     try {
-      const response = await authApiClient.post('/api/auth/login', credentials);
+      console.log('🔐 Starting login process with enhanced retry logic...');
+      const response = await retryRequest(authApiClient, {
+        method: 'post',
+        url: '/api/auth/login',
+        data: credentials
+      });
       
       // Handle different token structures from Production API
       const tokens = response.data.tokens || {};
@@ -250,11 +268,13 @@ export const authApi = {
       // Set tokens after successful login
       if (accessToken) {
         setAuthTokens(accessToken, refreshTokenValue);
+        console.log('✅ Login successful, tokens set');
       }
       
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+      console.error('🔐 Login failed after all retry attempts:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Login failed');
     }
   },
 
