@@ -5,84 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { useAuth } from '../contexts/AuthContext';
+import { useVillages } from '../hooks/useVillages';
 
 const VillageManagementPage = () => {
   const { user, hasPermission } = useAuth();
-  const [villages, setVillages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { villages, loading, error, fetchVillages } = useVillages();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedVillage, setSelectedVillage] = useState(null);
 
-  // Sample data for development
-  const sampleVillages = [
-    {
-      id: 'village-sv001',
-      name: 'หมู่บ้านสมาร์ทวิลเลจ 1',
-      code: 'SV001',
-      description: 'หมู่บ้านต้นแบบสมาร์ทวิลเลจ',
-      address: '123 ถนนสมาร์ท',
-      province: 'กรุงเทพมหานคร',
-      district: 'เขตบางรัก',
-      sub_district: 'แขวงสีลม',
-      postal_code: '10500',
-      total_properties: 150,
-      total_residents: 420,
-      is_active: true,
-      is_verified: true,
-      contact_person: 'นายสมชาย ใจดี',
-      contact_phone: '02-123-4567',
-      contact_email: 'contact@sv001.com',
-      created_at: '2024-01-15T10:30:00Z'
-    },
-    {
-      id: 'village-sv002',
-      name: 'หมู่บ้านเทคโนโลยี',
-      code: 'SV002',
-      description: 'หมู่บ้านที่ใช้เทคโนโลยีสมัยใหม่',
-      address: '456 ถนนเทคโนโลยี',
-      province: 'เชียงใหม่',
-      district: 'เมืองเชียงใหม่',
-      sub_district: 'ตำบลสุเทพ',
-      postal_code: '50200',
-      total_properties: 200,
-      total_residents: 580,
-      is_active: true,
-      is_verified: true,
-      contact_person: 'นางสาวสุดา เก่งเทค',
-      contact_phone: '053-987-6543',
-      contact_email: 'info@sv002.com',
-      created_at: '2024-02-20T14:15:00Z'
-    },
-    {
-      id: 'village-sv003',
-      name: 'หมู่บ้านอีโค',
-      code: 'SV003',
-      description: 'หมู่บ้านเป็นมิตรกับสิ่งแวดล้อม',
-      address: '789 ถนนธรรมชาติ',
-      province: 'ภูเก็ต',
-      district: 'เมืองภูเก็ต',
-      sub_district: 'ตำบลรัษฎา',
-      postal_code: '83000',
-      total_properties: 120,
-      total_residents: 350,
-      is_active: true,
-      is_verified: false,
-      contact_person: 'นายธรรมชาติ รักษ์โลก',
-      contact_phone: '076-555-1234',
-      contact_email: 'eco@sv003.com',
-      created_at: '2024-03-10T09:45:00Z'
-    }
-  ];
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setVillages(sampleVillages);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    fetchVillages();
+  }, [fetchVillages]);
 
   const filteredVillages = villages.filter(village => {
     const matchesSearch = village.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

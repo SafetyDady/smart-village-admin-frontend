@@ -435,12 +435,66 @@ const initializeTokens = () => {
   }
 };
 
+// Villages API
+const villagesApi = {
+  // Get all villages
+  async getAll() {
+    try {
+      const response = await mainApiClient.get('/api/villages');
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch villages: ${error.response?.data?.message || error.message}`);
+    }
+  },
+
+  // Get village by ID
+  async getById(id) {
+    try {
+      const response = await mainApiClient.get(`/api/villages/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch village: ${error.response?.data?.message || error.message}`);
+    }
+  },
+
+  // Create new village
+  async create(villageData) {
+    try {
+      const response = await mainApiClient.post('/api/villages', villageData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to create village: ${error.response?.data?.message || error.message}`);
+    }
+  },
+
+  // Update village
+  async update(id, villageData) {
+    try {
+      const response = await mainApiClient.put(`/api/villages/${id}`, villageData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to update village: ${error.response?.data?.message || error.message}`);
+    }
+  },
+
+  // Delete village
+  async delete(id) {
+    try {
+      const response = await mainApiClient.delete(`/api/villages/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to delete village: ${error.response?.data?.message || error.message}`);
+    }
+  }
+};
+
 // Initialize on module load
 initializeTokens();
 
 export default {
   authApi,
   mainApi,
+  villagesApi,
   setAuthTokens,
   clearAuthTokens,
   handleApiError

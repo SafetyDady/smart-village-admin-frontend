@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '../lib/api';
+import apiClient from '../services/apiClient';
 
 // Custom hook for managing villages data
 export const useVillages = () => {
@@ -12,9 +12,9 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.villages.getAll();
-      // API returns { success: true, data: [...], count: number, message: string }
-      setVillages(Array.isArray(response.data) ? response.data : []);
+      const response = await apiClient.villagesApi.getAll();
+      // API returns { villages: [...], pagination: {...}, user_role: string, access_scope: string }
+      setVillages(Array.isArray(response.villages) ? response.villages : []);
     } catch (err) {
       setError(err.message);
       setVillages([]);
@@ -28,7 +28,7 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.villages.create(villageData);
+      const response = await apiClient.villagesApi.create(villageData);
       // API returns { success: true, data: {...}, message: string }
       const newVillage = response.data;
       setVillages(prev => [...prev, newVillage]);
@@ -46,7 +46,7 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiService.villages.update(id, villageData);
+      const response = await apiClient.villagesApi.update(id, villageData);
       // API returns { success: true, data: {...}, message: string }
       const updatedVillage = response.data;
       setVillages(prev => 
@@ -68,7 +68,7 @@ export const useVillages = () => {
     setLoading(true);
     setError(null);
     try {
-      await apiService.villages.delete(id);
+      await apiClient.villagesApi.delete(id);
       setVillages(prev => prev.filter(village => village.id !== id));
     } catch (err) {
       setError(err.message);
@@ -91,38 +91,6 @@ export const useVillages = () => {
     createVillage,
     updateVillage,
     deleteVillage,
-  };
-};
-
-// Custom hook for API health check
-export const useHealthCheck = () => {
-  const [health, setHealth] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const checkHealth = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await apiService.healthCheck();
-      setHealth(data);
-    } catch (err) {
-      setError(err.message);
-      setHealth(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkHealth();
-  }, [checkHealth]);
-
-  return {
-    health,
-    loading,
-    error,
-    checkHealth,
   };
 };
 
