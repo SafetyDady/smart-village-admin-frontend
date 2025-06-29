@@ -7,9 +7,9 @@ import axios from 'axios';
 
 // API Configuration
 const API_CONFIG = {
-  // Production Backend API
-  AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://58hpi8cl1kdy.manus.space',
-  MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://58hpi8cl1kdy.manus.space',
+  // Production Backend API - Updated to working Backend URL
+  AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://5003-i20g2mf7h3g6yvum87t6g-c75ee32d.manusvm.computer',
+  MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://5003-i20g2mf7h3g6yvum87t6g-c75ee32d.manusvm.computer',
   TIMEOUT: 10000, // 10 seconds
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000 // 1 second
