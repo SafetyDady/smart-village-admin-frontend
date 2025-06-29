@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
+import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import UserManagementPage from './pages/UserManagementPage';
 import PropertyManagementPage from './pages/PropertyManagementPage';
@@ -48,7 +49,7 @@ function AppContent() {
         return <PropertyManagementPage onBack={handleBackToDashboard} />;
       case 'financial':
         return (
-          <div className="container mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-4">Financial Management</h1>
               <p className="text-gray-600 mb-4">Coming soon in Phase 4...</p>
@@ -63,7 +64,7 @@ function AppContent() {
         );
       case 'reports':
         return (
-          <div className="container mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-4">Reports & Analytics</h1>
               <p className="text-gray-600 mb-4">Coming soon in Phase 4...</p>
@@ -78,7 +79,7 @@ function AppContent() {
         );
       case 'settings':
         return (
-          <div className="container mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-4">System Settings</h1>
               <p className="text-gray-600 mb-4">Coming soon in Phase 4...</p>
@@ -96,7 +97,11 @@ function AppContent() {
     }
   };
 
-  return renderCurrentPage();
+  return (
+    <Layout>
+      {renderCurrentPage()}
+    </Layout>
+  );
 }
 
 function App() {
