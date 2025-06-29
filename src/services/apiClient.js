@@ -224,8 +224,25 @@ mainApiClient.interceptors.response.use(
 const retryRequest = async (apiClient, config, attempt = 1) => {
   try {
     console.log(`🚀 API Request attempt ${attempt}/${API_CONFIG.RETRY_ATTEMPTS}: ${config.method?.toUpperCase()} ${config.url}`);
-    return await apiClient(config);
+    console.log(`📊 Request config:`, {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      timeout: apiClient.defaults.timeout
+    });
+    
+    const response = await apiClient(config);
+    console.log(`✅ Request successful on attempt ${attempt}`);
+    return response;
   } catch (error) {
+    console.error(`❌ Request failed on attempt ${attempt}:`, {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      responseData: error.response?.data
+    });
+    
     const isRetryableError = 
       error.code === 'ECONNABORTED' || // Timeout
       error.code === 'ENOTFOUND' ||    // DNS resolution failed
@@ -233,6 +250,7 @@ const retryRequest = async (apiClient, config, attempt = 1) => {
       error.code === 'ETIMEDOUT' ||    // Connection timeout
       error.message?.includes('timeout') || // Timeout in message
       error.message?.includes('Network Error') || // Network error
+      error.message?.includes('ERR_NETWORK') || // Chrome network error
       (error.response?.status >= 500 && error.response?.status < 600); // Server errors
 
     if (attempt < API_CONFIG.RETRY_ATTEMPTS && isRetryableError) {
@@ -244,7 +262,21 @@ const retryRequest = async (apiClient, config, attempt = 1) => {
     }
     
     console.error(`❌ Request failed after ${attempt} attempts:`, error.message);
-    throw error;
+    
+    // Provide more specific error messages
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      throw new Error(`Connection timeout after ${attempt} attempts. Please check your internet connection.`);
+    } else if (error.code === 'ENOTFOUND') {
+      throw new Error(`Cannot reach server. Please check your internet connection.`);
+    } else if (error.response?.status === 401) {
+      throw new Error('Invalid username or password');
+    } else if (error.response?.status === 403) {
+      throw new Error('Access denied');
+    } else if (error.response?.status >= 500) {
+      throw new Error('Server error. Please try again later.');
+    } else {
+      throw new Error(error.response?.data?.message || error.message || 'Network error occurred');
+    }
   }
 };
 
