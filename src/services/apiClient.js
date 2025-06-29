@@ -7,9 +7,9 @@ import axios from 'axios';
 
 // API Configuration
 const API_CONFIG = {
-  // Production Backend API - Updated to working Backend URL
-  AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://5003-i20g2mf7h3g6yvum87t6g-c75ee32d.manusvm.computer',
-  MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://5003-i20g2mf7h3g6yvum87t6g-c75ee32d.manusvm.computer',
+  // Production Backend API - Railway Backend
+  AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://smart-village-backend-production-3408.up.railway.app',
+  MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://smart-village-backend-production-3408.up.railway.app',
   TIMEOUT: 30000, // 30 seconds - เพิ่มจาก 10s เพื่อแก้ไขปัญหา timeout
   RETRY_ATTEMPTS: 5, // เพิ่มจาก 3 เป็น 5 ครั้ง
   RETRY_DELAY: 2000, // เพิ่มจาก 1s เป็น 2s
