@@ -5,6 +5,9 @@ import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import UserManagementPage from './pages/UserManagementPage';
 import PropertyManagementPage from './pages/PropertyManagementPage';
+import VillageManagementPage from './pages/VillageManagementPage';
+import UserVillageAssignmentPage from './pages/UserVillageAssignmentPage';
+import EmergencyOverridePage from './pages/EmergencyOverridePage';
 import { Toaster } from 'sonner';
 import './App.css';
 
@@ -45,6 +48,12 @@ function AppContent() {
     switch (currentPage) {
       case 'users':
         return <UserManagementPage onBack={handleBackToDashboard} />;
+      case 'villages':
+        return <VillageManagementPage onBack={handleBackToDashboard} />;
+      case 'user-villages':
+        return <UserVillageAssignmentPage onBack={handleBackToDashboard} />;
+      case 'emergency-override':
+        return <EmergencyOverridePage onBack={handleBackToDashboard} />;
       case 'properties':
         return <PropertyManagementPage onBack={handleBackToDashboard} />;
       case 'financial':
@@ -98,7 +107,7 @@ function AppContent() {
   };
 
   return (
-    <Layout>
+    <Layout activeItem={currentPage} onNavigate={handleNavigate}>
       {renderCurrentPage()}
     </Layout>
   );

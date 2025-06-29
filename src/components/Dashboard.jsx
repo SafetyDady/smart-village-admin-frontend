@@ -22,7 +22,15 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard({ onNavigate }) {
-  const { user, logout, userName, userInitials, lastLogin, hasRole, hasPermission } = useAuth();
+  const { 
+    user, 
+    logout, 
+    userName, 
+    userInitials, 
+    lastLogin, 
+    hasRole, 
+    hasPermission
+  } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -89,7 +97,7 @@ export default function Dashboard({ onNavigate }) {
           {/* Welcome Section */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome back, {user?.firstName}!
+              Welcome back, {userName || user?.username}!
             </h2>
             <p className="text-gray-600">
               Here's what you can do with your current permissions.

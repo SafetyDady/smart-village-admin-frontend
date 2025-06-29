@@ -7,7 +7,8 @@ import {
   User, 
   LogOut,
   Menu,
-  Home
+  Home,
+  Shield
 } from 'lucide-react';
 
 export default function Header({ onToggleSidebar, sidebarCollapsed }) {
@@ -16,7 +17,7 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }) {
     logout, 
     userName, 
     userInitials, 
-    isAuthenticated 
+    isAuthenticated
   } = useAuth();
 
   const handleLogout = async () => {

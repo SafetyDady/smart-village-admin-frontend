@@ -5,13 +5,15 @@ import {
   Home,
   Users, 
   Building, 
+  MapPin,
   DollarSign,
   BarChart3,
   Settings,
   HelpCircle,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle
 } from 'lucide-react';
 
 export default function Sidebar({ collapsed, onToggle, activeItem, onNavigate }) {
@@ -19,7 +21,7 @@ export default function Sidebar({ collapsed, onToggle, activeItem, onNavigate })
     user, 
     logout, 
     hasPermission,
-    isAuthenticated 
+    isAuthenticated
   } = useAuth();
 
   const handleLogout = async () => {
@@ -54,11 +56,36 @@ export default function Sidebar({ collapsed, onToggle, activeItem, onNavigate })
       onClick: () => onNavigate && onNavigate('users')
     },
     {
+      id: 'villages',
+      label: 'Village Management',
+      icon: MapPin,
+      path: '/villages',
+      permissions: ['villages.read', 'villages.create', 'villages.update', 'villages.delete'],
+      onClick: () => onNavigate && onNavigate('villages')
+    },
+    {
+      id: 'user-villages',
+      label: 'User-Village Assignment',
+      icon: Users,
+      path: '/user-villages',
+      permissions: ['users.read', 'villages.read', 'users.update'],
+      onClick: () => onNavigate && onNavigate('user-villages')
+    },
+    {
+      id: 'emergency-override',
+      label: 'Emergency Override',
+      icon: AlertTriangle,
+      path: '/emergency-override',
+      permissions: ['system.emergency_override'],
+      onClick: () => onNavigate && onNavigate('emergency-override'),
+      superAdminOnly: true
+    },
+    {
       id: 'properties',
       label: 'Property Management',
       icon: Building,
       path: '/properties',
-      permissions: ['villages.read', 'villages.create', 'villages.update', 'villages.delete'],
+      permissions: ['properties.read', 'properties.create', 'properties.update', 'properties.delete'],
       onClick: () => onNavigate && onNavigate('properties')
     },
     {
@@ -97,6 +124,11 @@ export default function Sidebar({ collapsed, onToggle, activeItem, onNavigate })
 
   // Filter menu items based on permissions
   const availableItems = menuItems.filter(item => {
+    // Check if item is for Super Admin only
+    if (item.superAdminOnly && user?.role !== 'superadmin') {
+      return false;
+    }
+    
     // If no permissions required, show to all authenticated users
     if (item.permissions.length === 0) {
       return true;

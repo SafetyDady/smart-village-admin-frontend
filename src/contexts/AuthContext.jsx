@@ -130,6 +130,18 @@ export function AuthProvider({ children }) {
             return []; // Fallback to empty array
           };
 
+          const enhancePermissionsForSuperAdmin = (permissions, role) => {
+            // Add emergency override permission for superadmin
+            if (role === 'superadmin' && Array.isArray(permissions)) {
+              const enhancedPermissions = [...permissions];
+              if (!enhancedPermissions.includes('system.emergency_override')) {
+                enhancedPermissions.push('system.emergency_override');
+              }
+              return enhancedPermissions;
+            }
+            return permissions;
+          };
+
           const transformRoles = (role, roles) => {
             // Check if roles array exists first
             if (Array.isArray(roles)) {
@@ -149,7 +161,7 @@ export function AuthProvider({ children }) {
           // Normalize user data to ensure arrays
           const normalizedUser = {
             ...userData,
-            permissions: transformPermissions(userData.permissions),
+            permissions: enhancePermissionsForSuperAdmin(transformPermissions(userData.permissions), userData.role),
             roles: transformRoles(userData.role, userData.roles),
             // Map field names if needed
             first_name: userData.firstName || userData.first_name,
@@ -225,6 +237,18 @@ export function AuthProvider({ children }) {
         return []; // Fallback to empty array
       };
 
+      const enhancePermissionsForSuperAdmin = (permissions, role) => {
+        // Add emergency override permission for superadmin
+        if (role === 'superadmin' && Array.isArray(permissions)) {
+          const enhancedPermissions = [...permissions];
+          if (!enhancedPermissions.includes('system.emergency_override')) {
+            enhancedPermissions.push('system.emergency_override');
+          }
+          return enhancedPermissions;
+        }
+        return permissions;
+      };
+
       const transformRoles = (role, roles) => {
         // Check if roles array exists first
         if (Array.isArray(roles)) {
@@ -244,7 +268,7 @@ export function AuthProvider({ children }) {
       // Normalize user data to ensure arrays
       const normalizedUser = {
         ...data.user,
-        permissions: transformPermissions(data.user.permissions),
+        permissions: enhancePermissionsForSuperAdmin(transformPermissions(data.user.permissions), data.user.role),
         roles: transformRoles(data.user.role, data.user.roles),
         // Map field names if needed
         first_name: data.user.firstName || data.user.first_name,

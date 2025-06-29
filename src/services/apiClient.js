@@ -7,9 +7,9 @@ import axios from 'axios';
 
 // API Configuration
 const API_CONFIG = {
-  // Railway Production Services
-  AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://smart-village-auth-service-production.up.railway.app',
-  MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://smart-village-backend-production.up.railway.app',
+  // Production Backend API
+  AUTH_BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://58hpi8cl1kdy.manus.space',
+  MAIN_API_BASE_URL: import.meta.env.VITE_MAIN_API_URL || 'https://58hpi8cl1kdy.manus.space',
   TIMEOUT: 10000, // 10 seconds
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000 // 1 second
