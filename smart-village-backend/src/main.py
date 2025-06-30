@@ -116,7 +116,9 @@ def create_app():
         'https://wgscfdrb.manus.space',
         'https://wgscfdrb.manus.space/',
         'https://ytzwirsl.manus.space',
-        'https://ytzwirsl.manus.space/'
+        'https://ytzwirsl.manus.space/',
+        'https://kbcbyeav.manus.space',
+        'https://kbcbyeav.manus.space/'
     ]
     
     # CORS Debugging: Log all CORS-related information
